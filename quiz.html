@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class 9 IT Quiz</title>
+<style>
+:root{
+  --navy:#14284B; --gold:#C9A227; --bg:#F4F6FB; --card:#fff; --ink:#142038; --muted:#5b6780;
+  --line:#cfd6e6; --ok:#1e8e3e; --okbg:#d9f2e0; --bad:#d93025; --badbg:#fde0dd; --sel:#e8eefc;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+header{background:var(--navy);color:#fff;padding:.7vw 2vw;display:flex;align-items:center;justify-content:space-between;border-bottom:.5vw solid var(--gold);gap:2vw}
+header h1{margin:0;font-size:clamp(18px,2.2vw,34px)}
+header .by{font-size:clamp(11px,1.2vw,19px);color:#f1e3a9;margin-top:.1em}
+header .meta{font-size:clamp(14px,1.6vw,26px);color:#f1e3a9;white-space:nowrap}
+.bar{height:.7vw;min-height:6px;background:#dfe5f3}
+.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:2vw 5vw;min-height:0;overflow:auto}
+.tag{align-self:flex-start;background:var(--navy);color:#fff;border-radius:99px;padding:.2em .9em;font-size:clamp(12px,1.3vw,20px);margin-bottom:1vw}
+.tag.app{background:var(--gold);color:#14284B}
+.q{font-size:clamp(22px,3.3vw,56px);font-weight:700;line-height:1.25;margin:0 0 2vw}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:1.2vw}
+.opt{display:flex;align-items:center;gap:1vw;text-align:left;font:inherit;font-size:clamp(18px,2.4vw,40px);background:var(--card);color:var(--ink);border:.25vw solid var(--line);border-radius:1vw;padding:1.1vw 1.4vw;cursor:pointer;transition:background .15s,border-color .15s}
+.opt:hover:not(:disabled){border-color:var(--navy)}
+.opt .k{flex:none;width:2.4em;height:2.4em;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.8em}
+.opt.sel{background:var(--sel);border-color:var(--navy)}
+.opt.correct{background:var(--okbg);border-color:var(--ok);color:#0d4d1f}
+.opt.correct .k{background:var(--ok)}
+.opt.wrong{background:var(--badbg);border-color:var(--bad);color:#7a1610}
+.opt.wrong .k{background:var(--bad)}
+.opt:disabled{cursor:default}
+.opt .mark{margin-left:auto;font-weight:800;font-size:1.1em}
+.feedback{min-height:2.2em;margin-top:1.6vw;font-size:clamp(18px,2.2vw,36px);font-weight:700}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+footer{display:flex;gap:1.2vw;justify-content:center;align-items:center;padding:1.2vw 2vw;background:#fff;border-top:1px solid var(--line)}
+.btn{font:inherit;font-size:clamp(16px,2vw,32px);font-weight:700;border:0;border-radius:.8vw;padding:.6em 1.6em;cursor:pointer;background:var(--navy);color:#fff}
+.btn.gold{background:var(--gold);color:#14284B}
+.btn.ghost{background:#e5e9f4;color:var(--navy)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,.opt:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
+.center{max-width:900px;margin:0 auto;text-align:center;width:100%}
+.center h2{font-size:clamp(24px,3.4vw,56px);margin:.2em 0}
+.choices{display:grid;gap:1vw;margin:2vw 0}
+.choice{font:inherit;font-size:clamp(18px,2.2vw,34px);padding:1em;border:.25vw solid var(--line);border-radius:1vw;background:#fff;cursor:pointer;color:var(--ink)}
+.choice small{display:block;color:var(--muted);font-size:.65em;margin-top:.2em}
+.choice.on{border-color:var(--navy);background:var(--sel)}
+.row{display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin:1vw 0}
+.pill{font:inherit;font-size:clamp(14px,1.6vw,26px);border:.2vw solid var(--line);background:#fff;border-radius:99px;padding:.4em 1.1em;cursor:pointer;color:var(--ink)}
+.pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.score{font-size:clamp(48px,9vw,150px);font-weight:800;color:var(--navy);line-height:1}
+.hide{display:none!important}
+.hint{color:var(--muted);font-size:clamp(12px,1.3vw,20px)}
+@media (max-width:760px){.opts{grid-template-columns:1fr} main{padding:4vw} .opt{padding:3vw} .q{margin-bottom:4vw}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1 id="title">Class 9 IT Quiz &mdash; VPS</h1><div class="by">Prepared by Ajay Sethi</div></div>
+  <div class="meta" id="meta"></div>
+</header>
+<div class="bar"><i id="prog"></i></div>
+
+<main id="start">
+  <div class="center">
+    <h2>Class 9 IT Quiz</h2>
+    <div class="hint" style="margin-bottom:.4em"><b>Prepared by Ajay Sethi</b> &middot; Vrindavan Public School</div>
+    <div class="hint">Choose chapter(s), question type and order, then start.</div>
+    <div class="choices" id="chapters">
+      <button class="choice on" data-v="c1">Chapter 1: Digital Presentation<small id="n1"></small></button>
+      <button class="choice" data-v="c2">Chapter 2: Entrepreneurial Skills<small id="n2"></small></button>
+      <button class="choice" data-v="both">Both Chapters<small id="n3"></small></button>
+    </div>
+    <div class="row" id="types">
+      <button class="pill on" data-v="all">All questions</button>
+      <button class="pill" data-v="Core">Core only</button>
+      <button class="pill" data-v="Application">Application-based only</button>
+    </div>
+    <div class="row" id="orders">
+      <button class="pill on" data-v="seq">In order</button>
+      <button class="pill" data-v="rand">Shuffle questions</button>
+    </div>
+    <div class="row"><button class="btn gold" id="go">Start Quiz</button></div>
+  </div>
+</main>
+
+<main id="quiz" class="hide">
+  <span class="tag" id="tag"></span>
+  <p class="q" id="q"></p>
+  <div class="opts" id="opts"></div>
+  <div class="feedback" id="fb" aria-live="polite"></div>
+</main>
+
+<main id="end" class="hide">
+  <div class="center">
+    <h2>Quiz Complete!</h2>
+    <div class="score" id="score"></div>
+    <p class="hint" id="pct" style="font-size:clamp(18px,2.4vw,38px)"></p>
+    <p class="hint">Prepared by Ajay Sethi</p>
+    <div class="row">
+      <button class="btn gold" id="again">Play Again</button>
+      <button class="btn ghost" id="home">Change Settings</button>
+    </div>
+  </div>
+</main>
+
+<footer id="foot" class="hide">
+  <button class="btn ghost" id="prev">&larr; Previous</button>
+  <button class="btn gold" id="check" disabled>Check Answer</button>
+  <button class="btn ghost hide" id="show">Show Answer</button>
+  <button class="btn" id="next" disabled>Next &rarr;</button>
+  <span class="hint">Keys: A–D choose &middot; Enter check/next</span>
+</footer>
+
+<script>
+const DATA = {"c1": [{"q": "A presentation is a method used to ______.", "o": ["store files on a disk", "write programs", "print documents", "convey a topic to an audience"], "a": 3, "t": "Core"}, {"q": "Which of the following is NOT normally included in a presentation?", "o": ["Table", "Sound and video", "Regular text", "Compiler"], "a": 3, "t": "Core"}, {"q": "How many lines are recommended on a single slide?", "o": ["1 to 2", "10 to 15", "20 to 25", "5 to 8"], "a": 3, "t": "Core"}, {"q": "What is the maximum number of graphics (images, drawings, tables or charts) advised on one slide?", "o": ["One", "Five", "Ten", "Two"], "a": 3, "t": "Core"}, {"q": "A slide should not contain more than ______ animation or video.", "o": ["three", "four", "two", "one"], "a": 3, "t": "Core"}, {"q": "The font size on a slide should depend on ______.", "o": ["the number of slides", "the file name", "the colour of the slide", "the room size and the distance between screen and audience"], "a": 3, "t": "Core"}, {"q": "For colours in a good presentation, which advice is given?", "o": ["Only black background", "Dark colours and bold letters on a fair or silent background", "Bright background with light text", "Only red text"], "a": 1, "t": "Core"}, {"q": "Which of these is a characteristic of a good presentation?", "o": ["Very small font", "Error-free grammar and spelling", "Spelling mistakes are fine", "Many animations on each slide"], "a": 1, "t": "Core"}, {"q": "In Windows, LibreOffice Impress can be started from ______.", "o": ["Control Panel > Printers", "Recycle Bin", "Start > LibreOffice > LibreOffice Impress", "Task Manager only"], "a": 2, "t": "Core"}, {"q": "The default file extension of an Impress presentation is ______.", "o": [".odt", ".odp", ".ods", ".pptx"], "a": 1, "t": "Core"}, {"q": "The Title bar of Impress contains ______.", "o": ["zoom slider", "slide thumbnails", "the menus", "the name of the presentation file with extension"], "a": 3, "t": "Core"}, {"q": "The menu used for copying, cutting and pasting text is ______.", "o": ["File", "Tools", "Edit", "View"], "a": 2, "t": "Core"}, {"q": "Which menu is used for window view adjustment and zooming?", "o": ["View", "Insert", "Help", "Format"], "a": 0, "t": "Core"}, {"q": "Tables, shapes, text boxes and charts are inserted from the ______ menu.", "o": ["Insert", "Slide", "Window", "Tools"], "a": 0, "t": "Core"}, {"q": "The Format menu contains functions for ______.", "o": ["spell checking", "closing windows", "text formatting", "saving files"], "a": 2, "t": "Core"}, {"q": "Which menu is used to insert, duplicate or delete a slide?", "o": ["Edit", "Help", "File", "Slide"], "a": 3, "t": "Core"}, {"q": "The Tools menu is used to control ______ in a presentation.", "o": ["spelling", "printing", "transitions", "colours"], "a": 0, "t": "Core"}, {"q": "Which menu is used for viewing already opened presentations?", "o": ["File", "Slide Show", "Window", "View"], "a": 2, "t": "Core"}, {"q": "The quickest way to open Help in Impress is the ______ key.", "o": ["F9", "F12", "F5", "F1"], "a": 3, "t": "Core"}, {"q": "The Tasks pane is located on the ______ part of the Impress window.", "o": ["right", "bottom", "left", "top"], "a": 0, "t": "Core"}, {"q": "The Slide pane (slide thumbnails) is located on the ______ part of the window.", "o": ["right", "bottom", "left", "centre"], "a": 2, "t": "Core"}, {"q": "The Tasks pane is made up of how many components?", "o": ["Five", "Four", "Three", "Six"], "a": 0, "t": "Core"}, {"q": "Which Tasks pane component is used to set the common style/base for all slides?", "o": ["Master pages", "Slide transition", "Layouts", "Table design"], "a": 0, "t": "Core"}, {"q": "Which component of the Tasks pane gives styles for creating tables?", "o": ["Table design", "Custom animation", "Layouts", "Master pages"], "a": 0, "t": "Core"}, {"q": "Which component is used to add, change or remove animation features?", "o": ["Custom animation", "Layouts", "Table design", "Master pages"], "a": 0, "t": "Core"}, {"q": "Which key combination closes the Impress application?", "o": ["Ctrl+M", "Ctrl+Q", "Ctrl+N", "Ctrl+W"], "a": 1, "t": "Core"}, {"q": "Which shortcut key creates a new presentation?", "o": ["Ctrl+Q", "Ctrl+N", "Ctrl+W", "Ctrl+M"], "a": 1, "t": "Core"}, {"q": "Which key starts the slide show from the first slide?", "o": ["F1", "F10", "F7", "F5"], "a": 3, "t": "Core"}, {"q": "Which shortcut closes only the current presentation?", "o": ["Ctrl+M", "Alt+F4", "Ctrl+W", "Ctrl+Q"], "a": 2, "t": "Core"}, {"q": "Which shortcut inserts a new slide?", "o": ["Ctrl+N", "Ctrl+P", "Ctrl+M", "Ctrl+S"], "a": 2, "t": "Core"}, {"q": "Which shortcut keys are used for Cut, Copy and Paste respectively?", "o": ["Ctrl+V, Ctrl+C, Ctrl+X", "Ctrl+X, Ctrl+C, Ctrl+V", "Ctrl+X, Ctrl+V, Ctrl+C", "Ctrl+C, Ctrl+X, Ctrl+V"], "a": 1, "t": "Core"}, {"q": "To save a presentation as PDF, click ______.", "o": ["Edit > Copy", "Slide > New Slide", "File > Export as PDF", "Tools > Spelling"], "a": 2, "t": "Core"}, {"q": "To publish a presentation on the web in HTML format, click ______.", "o": ["File > Export", "Edit > Paste", "Window > New", "View > Zoom"], "a": 0, "t": "Core"}, {"q": "The view that is not seen by the audience and is used for presenter's information is ______.", "o": ["Slide Sorter view", "Outline view", "Notes view", "Normal view"], "a": 2, "t": "Core"}, {"q": "Which view is best for rearranging the order of slides by drag and drop?", "o": ["Notes view", "Normal view", "Outline view", "Slide Sorter view"], "a": 3, "t": "Core"}, {"q": "Which view shows all slides in the outline (text) format?", "o": ["Handout Master", "Notes view", "Outline view", "Slide Sorter view"], "a": 2, "t": "Core"}, {"q": "The main view for formatting, designing and adding text, graphics and animation to individual slides is ______.", "o": ["Notes Master", "Handout Master", "Normal view", "Outline view"], "a": 2, "t": "Core"}, {"q": "Which of the following is NOT a workspace view of Impress?", "o": ["Debug view", "Handout Master", "Slide Sorter", "Notes Master"], "a": 0, "t": "Core"}, {"q": "The shortcut key to increase font size is ______.", "o": ["Ctrl+[", "Ctrl+]", "Ctrl+B", "Ctrl+U"], "a": 1, "t": "Core"}, {"q": "The shortcut key to decrease font size is ______.", "o": ["Ctrl+I", "Ctrl+P", "Ctrl+[", "Ctrl+]"], "a": 2, "t": "Core"}, {"q": "The shortcut keys for Bold, Italic and Underline are ______.", "o": ["Ctrl+A, Ctrl+B, Ctrl+C", "Ctrl+B, Ctrl+I, Ctrl+U", "Ctrl+U, Ctrl+B, Ctrl+I", "Ctrl+I, Ctrl+U, Ctrl+B"], "a": 1, "t": "Core"}, {"q": "The shortcut for Superscript in Impress is ______.", "o": ["Ctrl+Shift+G", "Shift+Ctrl+B", "Shift+Ctrl+P", "Ctrl+Alt+P"], "a": 2, "t": "Core"}, {"q": "The shortcut for Subscript in Impress is ______.", "o": ["Shift+Ctrl+B", "Ctrl+Shift+S", "Ctrl+Q", "Shift+Ctrl+P"], "a": 0, "t": "Core"}, {"q": "The keyboard shortcut to group selected objects is ______.", "o": ["Ctrl+Shift+G", "Ctrl+A", "Ctrl+Alt+Shift+G", "Ctrl+G"], "a": 0, "t": "Core"}, {"q": "The keyboard shortcut to ungroup objects is ______.", "o": ["Ctrl+Alt+Shift+G", "Ctrl+Q", "Ctrl+U", "Ctrl+Shift+G"], "a": 0, "t": "Core"}, {"q": "Which shortcut selects all objects on a slide?", "o": ["Ctrl+S", "Ctrl+D", "Ctrl+Z", "Ctrl+A"], "a": 3, "t": "Core"}, {"q": "Which key is used to move the insertion point to the next cell in a table?", "o": ["Caps Lock", "TAB", "Esc", "Shift"], "a": 1, "t": "Core"}, {"q": "The Delete key deletes the character ______ of the cursor.", "o": ["above", "below", "to the right", "to the left"], "a": 2, "t": "Core"}, {"q": "The Backspace key deletes the character ______ of the cursor.", "o": ["to the right", "to the left", "above", "below"], "a": 1, "t": "Core"}, {"q": "An image from the computer is inserted using ______.", "o": ["File > Close", "Insert > Image", "Slide > Rename", "Tools > Options"], "a": 1, "t": "Core"}, {"q": "An image from the gallery is inserted using ______.", "o": ["Insert > Media > Gallery", "Edit > Paste", "View > Zoom", "Insert > Table"], "a": 0, "t": "Core"}, {"q": "Which toolbar contains the Rotate icon used to rotate an image?", "o": ["Line and Filling toolbar", "Standard toolbar only", "Title bar", "Status bar"], "a": 0, "t": "Core"}, {"q": "The Image toolbar can be displayed using ______.", "o": ["Window > Close", "File > Export", "View > Toolbars > Image", "Slide > New Slide"], "a": 2, "t": "Core"}, {"q": "A slide transition is ______.", "o": ["an animation between two slides", "a type of table", "a file format", "a font style"], "a": 0, "t": "Core"}, {"q": "To apply a transition to all slides, click ______.", "o": ["Duplicate Slide", "Slide Sorter", "Group", "Apply to All Slides"], "a": 3, "t": "Core"}, {"q": "The 'Loop until next sound' option becomes active when ______.", "o": ["a table is inserted", "a sound is selected in the transition", "the zoom is 100%", "a slide is deleted"], "a": 1, "t": "Core"}, {"q": "Slide masters control the ______ of all slides in a presentation.", "o": ["file size only", "background colour, gradient or graphic", "keyboard layout", "printer settings"], "a": 1, "t": "Core"}, {"q": "The Master Pages section of the Sidebar has how many subsections?", "o": ["Three", "Two", "Five", "Four"], "a": 0, "t": "Core"}, {"q": "Which is NOT a subsection of Master Pages?", "o": ["Available for Use", "Deleted Items", "Recently Used", "Used in this Presentation"], "a": 1, "t": "Core"}, {"q": "The Status bar displays ______.", "o": ["slide transitions", "only the menus", "only the file name", "information about the active presentation, cursor position and zoom slider"], "a": 3, "t": "Core"}, {"q": "The insertion point is ______.", "o": ["the first slide", "the location of the blinking cursor where text will appear", "a type of layout", "the Help menu"], "a": 1, "t": "Core"}, {"q": "Slides are named slide1, slide2, ... by default. To change a name, right-click and choose ______.", "o": ["Delete Slide", "Rename Slide", "New Slide", "Duplicate Slide"], "a": 1, "t": "Core"}, {"q": "The Drawing toolbar is used to ______.", "o": ["run the slide show", "save files", "check spelling", "create lines and shapes (graphical objects)"], "a": 3, "t": "Core"}, {"q": "Grouping objects allows them to be ______.", "o": ["deleted permanently without undo", "saved as a font", "converted into text", "treated as a single object"], "a": 3, "t": "Core"}, {"q": "The first slide layout in Impress is ______.", "o": ["Two content", "Title slide", "Blank slide", "Title and content"], "a": 2, "t": "Core"}, {"q": "Which statement about the Undo function is correct?", "o": ["It reverses a recent change", "It inserts a slide", "It starts the slide show", "It closes the file"], "a": 0, "t": "Core"}, {"q": "Riya wants every slide of her presentation to have the same background colour and style. Which feature should she use?", "o": ["Slide master (Master pages)", "Spelling check", "Notes view", "Slide Sorter view"], "a": 0, "t": "Application"}, {"q": "Aman's slide has 15 lines of small text. What should he do to follow good presentation practice?", "o": ["Add three more videos", "Keep 5 to 8 lines on the slide", "Reduce the font to fit more", "Add more lines"], "a": 1, "t": "Application"}, {"q": "A teacher wants to move slide 9 to the second position by drag and drop. Which view is best?", "o": ["Slide Sorter view", "Outline view", "Notes view", "Handout Master"], "a": 0, "t": "Application"}, {"q": "Meera wants to write reminders for herself that the audience must not see during the show. Which view should she use?", "o": ["Slide Sorter view", "Outline view", "Normal view", "Notes view"], "a": 3, "t": "Application"}, {"q": "Karan is ready to present and wants to start the show from the first slide using the keyboard. What should he press?", "o": ["Ctrl+M", "F5", "F1", "Ctrl+W"], "a": 1, "t": "Application"}, {"q": "Priya wants to give her presentation to a friend as a PDF file. What should she use?", "o": ["Insert > Table", "Slide > New Slide", "File > Export as PDF", "Edit > Paste"], "a": 2, "t": "Application"}, {"q": "Rohit wants his slides to change by themselves after a few seconds. Where should he set this?", "o": ["Slide Transition > Automatically after", "Status bar", "Table design", "Master pages"], "a": 0, "t": "Application"}, {"q": "Anil types H2O in a slide and wants the 2 to appear below the line. Which shortcut should he use on the 2?", "o": ["Ctrl+U", "Shift+Ctrl+B", "Ctrl+B", "Shift+Ctrl+P"], "a": 1, "t": "Application"}, {"q": "Sneha has a logo and a text box that she wants to move together as a single object. What should she do?", "o": ["Group them (Ctrl+Shift+G)", "Delete them", "Rename the slide", "Duplicate the slide"], "a": 0, "t": "Application"}, {"q": "A student's slide has 4 pictures and 3 videos. Which guideline is broken?", "o": ["Use only dark colours", "Maximum two graphics and one animation or video per slide", "Use only 5 lines", "Use only one font"], "a": 1, "t": "Application"}, {"q": "Nisha wants to show marks of 5 students in 4 columns. What should she insert?", "o": ["A master slide", "A table with 4 columns and 6 rows", "A sound file", "A text box only"], "a": 1, "t": "Application"}, {"q": "Dev wants to publish his presentation on a website so that it opens in any browser. What should he do?", "o": ["Slide > Rename Slide", "File > Export and save as HTML", "File > Close", "Tools > Spelling"], "a": 1, "t": "Application"}, {"q": "A teacher wants to see all slide text in sequence as an outline. Which view helps?", "o": ["Outline view", "Notes view", "Slide Sorter view", "Slide Master view"], "a": 0, "t": "Application"}, {"q": "Tina's inserted picture is upside down. What should she use to correct it?", "o": ["The Delete key", "The Undo key only", "The Rotate icon on the Line and Filling toolbar", "The Zoom slider"], "a": 2, "t": "Application"}, {"q": "The hall is large and the audience sits far from the screen. What should the presenter do about the font?", "o": ["Use a smaller font size", "Remove all text", "Use a larger font size", "Use a tiny italic font"], "a": 2, "t": "Application"}, {"q": "Arjun wants to apply the same transition to all slides quickly. What should he click?", "o": ["Apply to All Slides", "Group", "Rename Slide", "Duplicate Slide"], "a": 0, "t": "Application"}, {"q": "A student accidentally deleted a line of text. What is the quickest way to bring it back?", "o": ["Insert a new slide", "Close the file", "Undo", "Start the show"], "a": 2, "t": "Application"}, {"q": "Seema wants a second slide with exactly the same content as slide 3. What should she do?", "o": ["Duplicate Slide", "Rename Slide", "New blank slide", "Delete Slide"], "a": 0, "t": "Application"}, {"q": "Rahul wants to add a ready-made picture that comes with Impress. Where should he go?", "o": ["View > Zoom", "Insert > Media > Gallery", "Window > Close", "Tools > Spelling"], "a": 1, "t": "Application"}, {"q": "A presenter uses a bright red background with orange text. Which guideline is not followed?", "o": ["Use many animations", "Use a table", "Use dark bold text on a fair/silent background", "Use 5 to 8 lines"], "a": 2, "t": "Application"}, {"q": "Pooja has finished her work and wants to close only the current presentation, keeping Impress open. Which shortcut should she use?", "o": ["Ctrl+W", "F5", "Alt+F4", "Ctrl+Q"], "a": 0, "t": "Application"}, {"q": "A student wants to create a new presentation from the keyboard. Which shortcut applies?", "o": ["Ctrl+W", "F5", "Ctrl+Q", "Ctrl+N"], "a": 3, "t": "Application"}], "c2": [{"q": "An entrepreneur is a person who ______.", "o": ["only buys and sells shares", "is self-employed, takes calculated risks and brings a new idea to start a business", "avoids all risks", "works only for a salary"], "a": 1, "t": "Core"}, {"q": "When is a shopkeeper considered an entrepreneur?", "o": ["Never", "Only if he/she implements an innovative method or concept in the business", "Always", "Only if the shop is large"], "a": 1, "t": "Core"}, {"q": "Entrepreneurship is the process of ______.", "o": ["only saving money", "developing a business plan, launching and running a business using innovation to meet customer needs and make a profit", "studying economics", "working for an employer"], "a": 1, "t": "Core"}, {"q": "An enterprise is ______.", "o": ["a bold project or undertaking that fulfils a need of society which no one has addressed", "a school", "a government office", "a type of salary"], "a": 0, "t": "Core"}, {"q": "An enterprise is started and run by a(n) ______.", "o": ["customer", "entrepreneur", "employee", "teacher"], "a": 1, "t": "Core"}, {"q": "'Money in circulation' because entrepreneurs invest in their businesses refers to ______ development.", "o": ["economic", "political", "cultural", "social"], "a": 0, "t": "Core"}, {"q": "Creation of jobs is an example of ______ development.", "o": ["natural", "economic", "technical", "social"], "a": 3, "t": "Core"}, {"q": "When entrepreneurs sell products like mobile phones, people can live more comfortably. This shows ______.", "o": ["trial and error", "loss of resources", "wage employment", "improved standard of living"], "a": 3, "t": "Core"}, {"q": "Entrepreneurs find the most efficient ways of using resources to reduce costs. This is ______.", "o": ["optimal use of resources", "service business", "wage employment", "wastage of resources"], "a": 0, "t": "Core"}, {"q": "Which quality means success may not come quickly, so one must wait and continue?", "o": ["Patience", "Fear", "Laziness", "Anger"], "a": 0, "t": "Core"}, {"q": "Thinking positively even when taking a big risk is called ______.", "o": ["Wage employment", "Trade", "Hybrid", "Positivity"], "a": 3, "t": "Core"}, {"q": "Which quality means never giving up and working hard to make the business successful?", "o": ["Hardworking and perseverance", "Fear of risk", "Dependency", "Carelessness"], "a": 0, "t": "Core"}, {"q": "An entrepreneur who needs to take firm decisions about the business must have ______.", "o": ["fear", "doubt", "confidence", "laziness"], "a": 2, "t": "Core"}, {"q": "Trying different innovative ideas to make the business successful is called ______.", "o": ["trial and error", "wage employment", "trade", "hybrid business"], "a": 0, "t": "Core"}, {"q": "Identifying a problem and coming up with original solutions shows ______.", "o": ["imitation only", "patience only", "creativity and innovation", "wage employment"], "a": 2, "t": "Core"}, {"q": "Which of the following is NOT a characteristic of entrepreneurship?", "o": ["Belief in hard work and discipline", "Ability to take risks", "Effective planning and execution", "Avoiding all planning and risk"], "a": 3, "t": "Core"}, {"q": "Which skill helps an entrepreneur manage finances properly?", "o": ["Singing", "Money management and financial literacy", "Painting", "Typing only"], "a": 1, "t": "Core"}, {"q": "Wage employment is a ______.", "o": ["type of product", "paid job where an employee works for an employer", "type of service", "business owned by the worker"], "a": 1, "t": "Core"}, {"q": "How many parties are involved in wage employment?", "o": ["Four", "One", "Three", "Two"], "a": 3, "t": "Core"}, {"q": "The two parties in wage employment are ______.", "o": ["employer and employee", "buyer and seller", "producer and trader", "teacher and student"], "a": 0, "t": "Core"}, {"q": "Which involves less risk for the employee?", "o": ["None", "Entrepreneurship", "Both equally high", "Wage employment"], "a": 3, "t": "Core"}, {"q": "Which of these is a benefit of entrepreneurship?", "o": ["No profit", "Fixed salary always", "Work for yourself, not for others", "No decisions to make"], "a": 2, "t": "Core"}, {"q": "'More risk, more profit' means entrepreneurship gives the freedom to ______.", "o": ["work only for others", "avoid all work", "earn a fixed salary", "choose how much risk you are willing to take"], "a": 3, "t": "Core"}, {"q": "How many types of business activities are there as per the notes?", "o": ["Two", "Three", "Four", "Five"], "a": 1, "t": "Core"}, {"q": "A sports store is an example of a ______ business.", "o": ["hybrid", "service", "wage", "product"], "a": 3, "t": "Core"}, {"q": "A cricket coaching centre is an example of a ______ business.", "o": ["trade", "hybrid", "product", "service"], "a": 3, "t": "Core"}, {"q": "A sports academy that offers coaching and sells sports equipment is a ______ business.", "o": ["wage", "service", "hybrid", "product"], "a": 2, "t": "Core"}, {"q": "A business that offers both products and services is called ______.", "o": ["product business", "hybrid business", "service business", "wage business"], "a": 1, "t": "Core"}, {"q": "In a product business, customer and seller trade ______.", "o": ["only skills", "only ideas", "only time", "tangible goods"], "a": 3, "t": "Core"}, {"q": "In a service business, the seller ______.", "o": ["helps a customer complete tasks", "only sells goods", "only manufactures", "only transports goods"], "a": 0, "t": "Core"}, {"q": "Which can be seen and touched?", "o": ["Neither", "A product", "A service", "Both"], "a": 1, "t": "Core"}, {"q": "Haircutting is an example of a ______.", "o": ["manufacturing business", "service", "trade business", "product"], "a": 1, "t": "Core"}, {"q": "Which can usually be stored in a shop or warehouse?", "o": ["A service", "Both", "Neither", "A product"], "a": 3, "t": "Core"}, {"q": "The quality and quantity of ______ can differ at different times.", "o": ["none", "a product", "a service", "both always same"], "a": 2, "t": "Core"}, {"q": "Businesses that make a product and sell it are called ______ businesses.", "o": ["trade", "manufacturing", "service", "hybrid"], "a": 1, "t": "Core"}, {"q": "Businesses that buy and sell products and transport them from factory to warehouses and shops are ______ businesses.", "o": ["wage", "trade", "service", "manufacturing"], "a": 1, "t": "Core"}, {"q": "Entrepreneurship development is the process of ______.", "o": ["closing businesses", "enhancing entrepreneurs' abilities and expertise", "avoiding customers", "reducing profits"], "a": 1, "t": "Core"}, {"q": "What is the first step of starting a business?", "o": ["Improving the product", "Idea", "Understanding customer needs", "Getting money"], "a": 1, "t": "Core"}, {"q": "A business idea can be based on ______.", "o": ["something you are interested in or a need you see in the market", "only copying others", "only a loan", "only a government order"], "a": 0, "t": "Core"}, {"q": "'Tasty food next to the station' is an example of an idea based on ______.", "o": ["wage employment", "a need seen in the market", "a service only", "a hobby only"], "a": 1, "t": "Core"}, {"q": "What is the second step in the entrepreneurship development process?", "o": ["Understanding customer needs", "Improving product", "Getting money and material", "Idea"], "a": 2, "t": "Core"}, {"q": "The step in which you find out what customers like and dislike is ______.", "o": ["Idea", "Closing the business", "Getting money and material", "Understanding customer needs"], "a": 3, "t": "Core"}, {"q": "The last step in the given process is ______.", "o": ["Improving product/service", "Understanding customer needs", "Getting money and material", "Idea"], "a": 0, "t": "Core"}, {"q": "Prem's customers liked variety. This is used in the step ______.", "o": ["Improving product/service", "Getting money and material", "Wage employment", "Idea"], "a": 0, "t": "Core"}, {"q": "Starting on a small scale with some money to buy basic material belongs to the step ______.", "o": ["Idea", "Customer needs", "Getting money and material", "Improving product"], "a": 2, "t": "Core"}, {"q": "Which is correct about wage employment and entrepreneurship?", "o": ["Wage employee takes more risk", "Entrepreneur has no profit", "Both take no risk", "Entrepreneur takes calculated risks; wage employee takes less risk"], "a": 3, "t": "Core"}, {"q": "Which is a quality of a successful entrepreneur?", "o": ["Creativity and innovation", "Fear of change", "Lack of confidence", "Laziness"], "a": 0, "t": "Core"}, {"q": "Who decides which work to do in entrepreneurship?", "o": ["The entrepreneur himself or herself", "Only the employer", "Only the customer", "Only the government"], "a": 0, "t": "Core"}, {"q": "Sunita opens a tea stall with a new idea of herbal tea in eco-friendly cups, meeting a need nobody has addressed. She is a(n) ______.", "o": ["entrepreneur", "wage employee", "customer", "trader only"], "a": 0, "t": "Application"}, {"q": "Ramesh works in a company and gets a fixed monthly payment from his employer. This is ______.", "o": ["entrepreneurship", "hybrid business", "wage employment", "trade business"], "a": 2, "t": "Application"}, {"q": "Gopal runs a general store exactly like others without any new idea. According to the notes, he is ______.", "o": ["a wage employee", "always an entrepreneur", "not an entrepreneur unless he brings an innovative method", "an enterprise"], "a": 2, "t": "Application"}, {"q": "Meena starts a dance class. This is a ______ business.", "o": ["manufacturing", "service", "product", "trade"], "a": 1, "t": "Application"}, {"q": "Ravi opens a shop that sells shoes. This is a ______ business.", "o": ["service", "wage", "product", "hybrid"], "a": 2, "t": "Application"}, {"q": "Rahul's academy gives cricket coaching and also sells bats and balls. This is a ______ business.", "o": ["service only", "hybrid", "product only", "wage"], "a": 1, "t": "Application"}, {"q": "A factory makes biscuits and sells them. This is a ______ business.", "o": ["manufacturing", "service", "trade", "wage"], "a": 0, "t": "Application"}, {"q": "A company buys biscuits from the factory and supplies them to shops. This is a ______ business.", "o": ["trade", "service", "hybrid", "manufacturing"], "a": 0, "t": "Application"}, {"q": "Prem's customers asked for more variety, so he added new dishes. Which step is this?", "o": ["Idea", "Wage employment", "Getting money and material", "Improving product/service"], "a": 3, "t": "Application"}, {"q": "Anita wants to start a snack stall. What is her first step?", "o": ["Come up with an idea", "Close the business", "Improve the product", "Understand customer needs"], "a": 0, "t": "Application"}, {"q": "Anita buys flour and oil with her small savings. This is the step ______.", "o": ["Understanding customer needs", "Getting money and material", "Idea", "Improving the product"], "a": 1, "t": "Application"}, {"q": "After selling begins, Anita asks customers what they like and dislike. This is the step ______.", "o": ["Closing", "Understanding customer needs", "Getting money and material", "Idea"], "a": 1, "t": "Application"}, {"q": "A shop fails in the first year, but its owner tries new ideas and continues. Which qualities are shown?", "o": ["Dependency", "Wage employment", "Laziness, fear", "Trial and error, perseverance"], "a": 3, "t": "Application"}, {"q": "A barber cutting hair is providing a ______.", "o": ["product", "manufactured good", "stored item", "service"], "a": 3, "t": "Application"}, {"q": "A company opens a new plant and 200 people get jobs. This shows ______ development.", "o": ["product", "hybrid", "social", "wage"], "a": 2, "t": "Application"}, {"q": "An entrepreneur finds a cheaper way to use raw material. This is ______.", "o": ["trial only", "wastage", "optimal use of resources", "wage employment"], "a": 2, "t": "Application"}, {"q": "A business has not made profit for two years but the owner stays calm and waits. Which quality is this?", "o": ["Carelessness", "Anger", "Patience", "Fear"], "a": 2, "t": "Application"}, {"q": "A new mobile phone company makes communication easier for people. This improves ______.", "o": ["rent only", "wage employment", "the standard of living", "the number of parties"], "a": 2, "t": "Application"}, {"q": "A student who loves painting starts selling paintings. Which benefit of entrepreneurship is shown?", "o": ["Doing what you are interested in", "No risk", "Fixed salary", "No profit"], "a": 0, "t": "Application"}, {"q": "A person chooses a high-risk business hoping for higher profit. Which idea does this show?", "o": ["Wage employment", "More risk, more profit", "Optimal resources", "No risk, no profit"], "a": 1, "t": "Application"}, {"q": "A mobile repair shop is a ______ business.", "o": ["service", "manufacturing", "trade", "product"], "a": 0, "t": "Application"}, {"q": "A teacher paid by a school is an example of ______.", "o": ["wage employment", "hybrid business", "entrepreneurship", "trade business"], "a": 0, "t": "Application"}, {"q": "A man opens a food stall next to a railway station because travellers need tasty food. His idea is based on ______.", "o": ["wage employment", "a government rule", "a need seen in the market", "his hobby only"], "a": 2, "t": "Application"}, {"q": "Shyam sells ready-made sweets he buys from a factory and also delivers them to shops. His business is a ______.", "o": ["manufacturing business", "wage job", "trade business", "service business"], "a": 2, "t": "Application"}]};
+const $ = id => document.getElementById(id);
+let chapter="c1", qtype="all", order="seq";
+let deck=[], i=0, score=0, picked=null;
+let state=[]; // per question: {pick, checked}
+
+$("n1").textContent = DATA.c1.length + " questions";
+$("n2").textContent = DATA.c2.length + " questions";
+$("n3").textContent = (DATA.c1.length + DATA.c2.length) + " questions";
+
+function bind(groupId, setter){
+  $(groupId).addEventListener("click", e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    [...$(groupId).children].forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); setter(b.dataset.v);
+  });
+}
+bind("chapters", v=>chapter=v);
+bind("types", v=>qtype=v);
+bind("orders", v=>order=v);
+
+function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+
+function build(){
+  let pool = chapter==="both" ? DATA.c1.concat(DATA.c2) : DATA[chapter].slice();
+  if(qtype!=="all") pool = pool.filter(x=>x.t===qtype);
+  if(order==="rand") shuffle(pool);
+  deck=pool; i=0; score=0;
+  state = deck.map(()=>({pick:null, done:false, wrong:[], revealed:false}));
+}
+
+function show(sec){
+  ["start","quiz","end"].forEach(s=>$(s).classList.toggle("hide", s!==sec));
+  $("foot").classList.toggle("hide", sec!=="quiz");
+}
+
+function render(){
+  const d=deck[i];
+  $("tag").textContent = d.t==="Application" ? "Application-based" : "Core";
+  $("tag").className = "tag" + (d.t==="Application" ? " app" : "");
+  $("q").textContent = (i+1) + ". " + d.q;
+  $("meta").textContent = "Question " + (i+1) + " / " + deck.length;
+  $("prog").style.width = (i/deck.length*100) + "%";
+  const box=$("opts"); box.innerHTML="";
+  d.o.forEach((txt,k)=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.type="button"; b.dataset.k=k;
+    b.innerHTML='<span class="k">'+"ABCD"[k]+'</span><span class="t"></span><span class="mark"></span>';
+    b.querySelector(".t").textContent=txt;
+    b.addEventListener("click",()=>choose(k));
+    box.appendChild(b);
+  });
+  $("prev").disabled = i===0;
+  $("next").textContent = (i===deck.length-1) ? "Finish" : "Next \u2192";
+  paint(); syncButtons();
+}
+
+function syncButtons(){
+  const st=state[i];
+  $("check").disabled = st.done || st.pick===null;
+  $("next").disabled = !st.done;
+  $("show").classList.toggle("hide", !(st.wrong.length>0 && !st.done));
+}
+
+function choose(k){
+  const st=state[i]; if(st.done || st.wrong.includes(k)) return;
+  st.pick=k; paint(); syncButtons();
+}
+
+function paint(){
+  const d=deck[i], st=state[i];
+  [...$("opts").children].forEach((b,k)=>{
+    b.classList.remove("sel","correct","wrong");
+    b.querySelector(".mark").textContent="";
+    b.disabled = st.done || st.wrong.includes(k);
+    if(st.wrong.includes(k)){ b.classList.add("wrong"); b.querySelector(".mark").textContent="\u2718"; }
+    else if(st.done && k===d.a){ b.classList.add("correct"); b.querySelector(".mark").textContent="\u2714"; }
+    else if(k===st.pick && !st.done){ b.classList.add("sel"); }
+  });
+  const fb=$("fb");
+  if(st.done){
+    fb.textContent = st.revealed ? "Correct answer: " + "ABCD"[d.a] + ") " + d.o[d.a]
+      : (st.wrong.length ? "Correct! (after " + (st.wrong.length+1) + " tries)" : "Correct!");
+    fb.className = "feedback ok";
+  } else if(st.wrong.length){
+    fb.textContent = "Not correct. Try again!";
+    fb.className = "feedback bad";
+  } else { fb.textContent=""; fb.className="feedback"; }
+}
+
+function check(){
+  const st=state[i]; if(st.pick===null||st.done) return;
+  if(st.pick===deck[i].a){
+    st.done=true;
+    if(st.wrong.length===0) score++;
+  } else {
+    st.wrong.push(st.pick); st.pick=null;
+  }
+  paint(); syncButtons();
+}
+
+function showAnswer(){
+  const st=state[i]; if(st.done) return;
+  st.done=true; st.revealed=true; st.pick=deck[i].a;
+  paint(); syncButtons();
+}
+
+function next(){
+  if(!state[i].done) return;
+  if(i===deck.length-1){ finish(); return; }
+  i++; render();
+}
+
+function finish(){
+  $("prog").style.width="100%";
+  $("meta").textContent="";
+  $("score").textContent = score + " / " + deck.length;
+  $("pct").textContent = Math.round(score/deck.length*100) + "% correct on the first try";
+  show("end");
+}
+
+$("go").onclick=()=>{ build(); if(!deck.length){alert("No questions for this selection.");return;} show("quiz"); render(); };
+$("check").onclick=check;
+$("next").onclick=next;
+$("show").onclick=showAnswer;
+$("prev").onclick=()=>{ if(i>0){ i--; render(); } };
+$("again").onclick=()=>{ build(); show("quiz"); render(); };
+$("home").onclick=()=>{ $("prog").style.width="0"; $("meta").textContent=""; show("start"); };
+
+document.addEventListener("keydown",e=>{
+  if($("quiz").classList.contains("hide")) return;
+  const key=e.key.toLowerCase();
+  if("abcd".includes(key) && key.length===1){ choose("abcd".indexOf(key)); }
+  else if(key==="enter"){ e.preventDefault(); state[i].done ? next() : check(); }
+  else if(key==="arrowright"){ next(); }
+  else if(key==="arrowleft"){ if(i>0){i--;render();} }
+});
+</script>
+</body>
+</html>
