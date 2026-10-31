@@ -11,11 +11,14 @@
 body{margin:0;font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 header{background:var(--navy);color:#fff;padding:10px 18px;border-bottom:5px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 header h1{margin:0;font-size:22px} header .by{color:#f1e3a9;font-size:13px}
-.wrap{display:grid;grid-template-columns:minmax(300px,1fr) minmax(320px,1fr);gap:14px;padding:14px;max-width:1300px;margin:0 auto}
+.wrap{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(300px,1fr);gap:14px;padding:14px;max-width:1800px;margin:0 auto}
 @media(max-width:820px){.wrap{grid-template-columns:1fr}}
 .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
 .box h2{margin:0 0 8px;font-size:16px;color:var(--navy)}
-.stage{position:relative;background:#0b1224;border-radius:10px;overflow:hidden;aspect-ratio:16/10;display:grid;place-items:center}
+.stage{position:relative;background:#0b1224;border-radius:10px;overflow:hidden;aspect-ratio:16/9;min-height:300px;max-height:80vh;width:100%;display:grid;place-items:center}
+.stage:fullscreen{max-height:none;border-radius:0;aspect-ratio:auto;height:100%}
+.stage .fs{position:absolute;right:8px;bottom:8px;z-index:3;display:flex;gap:8px}
+.stage .fs button{background:rgba(20,40,75,.88);padding:10px 16px;font-size:15px}
 .stage video,.stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .stage .ph{color:#9aa6c4;font-size:14px;padding:16px;text-align:center;position:relative}
 button,.fbtn{font:inherit;font-weight:700;border:0;border-radius:8px;padding:9px 14px;background:var(--navy);color:#fff;cursor:pointer}
@@ -57,6 +60,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--navy);margin-bottom:6
     <div class="stage">
       <video id="video" playsinline muted class="hide"></video>
       <canvas id="view"></canvas>
+      <div class="fs"><button id="fsLive" class="hide">Stop Live Scan</button><button id="fsBtn">&#x26F6; Full screen</button></div>
       <div class="ph" id="ph">Camera is off. Press <b>Start Camera</b>, or <b>Scan a Photo</b>.</div>
     </div>
     <div class="btns">
@@ -10307,8 +10311,8 @@ function decodeAll(imgData){
     if(!r) break;
     const m=/^(.+)-(\d+)$/.exec(r.data);
     if(m){
-      const idx=Math.round(angleOf(r.location)/90)%4;
-      res.push({key:r.data,letter:LET[idx],loc:r.location});
+      const ang=angleOf(r.location), idx=Math.round(ang/90)%4, off=Math.abs(ang-Math.round(ang/90)*90);
+      res.push({key:r.data,letter:LET[idx],loc:r.location,amb:off>32});
     }
     maskPoly(imgData,polyScale(r.location,1.12));
   }
@@ -10319,7 +10323,7 @@ function shiftLoc(L,dx,dy){const f=p=>({x:p.x+dx,y:p.y+dy});return {topLeftCorne
 // Reads the whole canvas: whole frame first, then overlapping tiles, so many cards in one picture are all found.
 function decodeCanvas(ctx,W,H){
   const found={};
-  const add=(list,dx,dy)=>list.forEach(d=>{ if(!found[d.key]) found[d.key]={key:d.key,letter:d.letter,loc:shiftLoc(d.loc,dx,dy)}; });
+  const add=(list,dx,dy)=>list.forEach(d=>{ if(!found[d.key]) found[d.key]={key:d.key,letter:d.letter,amb:d.amb,loc:shiftLoc(d.loc,dx,dy)}; });
   add(decodeAll(ctx.getImageData(0,0,W,H)),0,0);
   [380,640,1000,1500].forEach(sz=>{
     if(sz>=Math.min(W,H)*0.98) return;
@@ -10332,15 +10336,44 @@ function decodeCanvas(ctx,W,H){
 
 /* ---------- drawing ---------- */
 const view=$("view"), vctx=view.getContext("2d");
-function drawBoxes(dets,scaleX=1,scaleY=1){
-  vctx.lineWidth=Math.max(3,view.width/300); vctx.font="bold "+Math.round(view.width/28)+"px Arial"; vctx.textAlign="center";
+const sm=document.createElement('canvas'), smx=sm.getContext('2d',{willReadFrequently:true});
+function scaleLoc(L,f){const g=p=>({x:p.x*f,y:p.y*f});return {topLeftCorner:g(L.topLeftCorner),topRightCorner:g(L.topRightCorner),bottomRightCorner:g(L.bottomRightCorner),bottomLeftCorner:g(L.bottomLeftCorner)};}
+const lastSeen={}; // key -> {loc,t}
+function poly(P,sx,sy){vctx.beginPath();P.forEach((p,i)=>i?vctx.lineTo(p.x*sx,p.y*sy):vctx.moveTo(p.x*sx,p.y*sy));vctx.closePath();}
+function padPoly(L,f){return polyScale(L,f);}
+function tag(txt,x,y,bg,fs){ vctx.font="bold "+fs+"px Arial"; const w=vctx.measureText(txt).width+fs*.8, h=fs*1.35;
+  vctx.fillStyle=bg; vctx.fillRect(x-w/2,y-h/2,w,h); vctx.fillStyle="#fff"; vctx.textAlign="center"; vctx.textBaseline="middle"; vctx.fillText(txt,x,y+1); vctx.textBaseline="alphabetic"; }
+// green = card read and answer known; red = problem (unknown card, unclear tilt, or card just lost)
+function drawBoxes(dets,scaleX=1,scaleY=1,withLost=false){
+  const W=view.width, lw=Math.max(4,W/220), fs=Math.round(W/34), now=Date.now(), R=roster();
+  const cur={};
   dets.forEach(d=>{
-    const L=d.loc,P=[L.topLeftCorner,L.topRightCorner,L.bottomRightCorner,L.bottomLeftCorner];
-    vctx.strokeStyle="#C9A227"; vctx.beginPath(); P.forEach((p,i)=>i?vctx.lineTo(p.x*scaleX,p.y*scaleY):vctx.moveTo(p.x*scaleX,p.y*scaleY)); vctx.closePath(); vctx.stroke();
-    const cx=P.reduce((a,p)=>a+p.x,0)/4*scaleX, cy=P.reduce((a,p)=>a+p.y,0)/4*scaleY;
-    vctx.fillStyle="rgba(20,40,75,.85)"; vctx.beginPath(); vctx.arc(cx,cy,view.width/45,0,7); vctx.fill();
-    vctx.fillStyle="#fff"; vctx.fillText(d.letter,cx,cy+view.width/90);
+    cur[d.key]=1; lastSeen[d.key]={loc:d.loc,t:now,letter:d.letter};
+    const known=R.some(r=>r.key===d.key), bad=d.amb||!known;
+    const P=padPoly(d.loc,1.18), col=bad?"#e53935":"#1fb24a";
+    vctx.lineWidth=lw; vctx.strokeStyle=col; vctx.fillStyle=bad?"rgba(229,57,53,.18)":"rgba(31,178,74,.18)";
+    poly(P,scaleX,scaleY); vctx.fill(); vctx.stroke();
+    const cx=P.reduce((a,p)=>a+p.x,0)/4*scaleX, cy=P.reduce((a,p)=>a+p.y,0)/4*scaleY, top=Math.min(...P.map(p=>p.y))*scaleY, bot=Math.max(...P.map(p=>p.y))*scaleY;
+    const roll=d.key.replace(/^.*-/,""), nm=(R.find(r=>r.key===d.key)||{}).name||"";
+    if(bad){ tag(d.amb?"Hold straight":"Unknown card",cx,cy,"#c62828",fs*.9); }
+    else {
+      vctx.fillStyle="#0d7a32"; vctx.beginPath(); vctx.arc(cx,cy,W/22,0,7); vctx.fill();
+      vctx.fillStyle="#fff"; vctx.font="bold "+Math.round(W/15)+"px Arial"; vctx.textAlign="center"; vctx.textBaseline="middle"; vctx.fillText(d.letter,cx,cy+2); vctx.textBaseline="alphabetic";
+      tag((nm?nm.split(" ")[0]+" ":"")+"("+roll+")",cx,Math.max(fs,top-fs*.8),"#0d7a32",fs*.85);
+    }
   });
+  if(withLost){ // cards seen a moment ago but not read in this frame -> red dashed square
+    Object.keys(lastSeen).forEach(k=>{
+      const o=lastSeen[k], age=now-o.t;
+      if(cur[k]) return; if(age>1500){ if(age>6000) delete lastSeen[k]; return; }
+      vctx.setLineDash([14,10]); vctx.lineWidth=lw; vctx.strokeStyle="#e53935"; vctx.fillStyle="rgba(229,57,53,.15)";
+      const P=padPoly(o.loc,1.18); poly(P,scaleX,scaleY); vctx.fill(); vctx.stroke(); vctx.setLineDash([]);
+      const cx=P.reduce((a,p)=>a+p.x,0)/4, cy=P.reduce((a,p)=>a+p.y,0)/4;
+      tag("not reading",cx,cy,"#c62828",fs*.8);
+    });
+  }
+  // counter
+  tag(Object.keys(cur).length+" read now",W*.5,fs*1.2,"rgba(20,40,75,.9)",fs);
 }
 
 /* ---------- camera ---------- */
@@ -10392,26 +10425,31 @@ async function liveLoop(){
     let dets;
     if($("far").checked){ dets=decodeCanvas(vctx,img.width,img.height); }
     else {
-      // fast: tile first (one tile per frame, cycling), then whole frame; cards seen in either count
-      const W=img.width,H=img.height,tw=Math.min(640,W),th=Math.min(640,H);
+      // fast path: a small copy of the frame (quick, finds hand-held cards that are close), plus one tile per frame
+      // and, every 5th frame, the whole full-size frame for cards that are further away
+      const W=img.width,H=img.height, f=W/640, sw=640, sh=Math.round(H/f);
+      sm.width=sw; sm.height=sh; smx.drawImage(view,0,0,sw,sh);
+      const sdet=decodeAll(smx.getImageData(0,0,sw,sh)).map(d=>({key:d.key,letter:d.letter,amb:d.amb,loc:scaleLoc(d.loc,f)}));
+      const tw=Math.min(640,W),th=Math.min(640,H);
       const xs=[0,Math.round((W-tw)/2),W-tw], ys=H>th?[0,H-th]:[0];
       const k=liveTile++ % (xs.length*ys.length), tx=xs[k%xs.length], ty=ys[Math.floor(k/xs.length)];
-      const tdet=decodeAll(vctx.getImageData(tx,ty,tw,th)).map(d=>({key:d.key,letter:d.letter,loc:shiftLoc(d.loc,tx,ty)}));
-      const wdet=decodeAll(vctx.getImageData(0,0,W,H));
-      const m={}; tdet.concat(wdet).forEach(d=>{ if(!m[d.key]) m[d.key]=d; }); dets=Object.values(m);
+      const tdet=decodeAll(vctx.getImageData(tx,ty,tw,th)).map(d=>({key:d.key,letter:d.letter,amb:d.amb,loc:shiftLoc(d.loc,tx,ty)}));
+      const wdet=(liveTile%5===0)?decodeAll(vctx.getImageData(0,0,W,H)):[];
+      const m={}; sdet.concat(tdet,wdet).forEach(d=>{ if(!m[d.key]) m[d.key]=d; }); dets=Object.values(m);
     }
-    drawBoxes(dets);
+    drawBoxes(dets,1,1,true);
     let changed=false;
     dets.forEach(d=>{
+      if(d.amb) return;
       const v=(liveVotes[d.key]=liveVotes[d.key]||{});
       v[d.letter]=(v[d.letter]||0)+1;
       for(const o in v) if(o!==d.letter) v[o]=Math.max(0,v[o]-0.5);
       let best=null,bn=0,tot=0; for(const l in v){tot+=v[l]; if(v[l]>bn){bn=v[l];best=l;}}
-      if(tot>=2 && best){
-        const isNew=!(d.key in answers[q]);
-        if(answers[q][d.key]!==best){ answers[q][d.key]=best; seen[d.key]=true; changed=true;
-          if(isNew){ beep(); const r=roster().find(x=>x.key===d.key); $("flash").textContent="\u2714 "+((r&&r.name)||d.key)+" scanned"; }
-        }
+      const cur=answers[q][d.key];
+      if(best && (cur===undefined || (best!==cur && v[best]>=2 && v[best]>(v[cur]||0)+0.5))){
+        const isNew=(cur===undefined);
+        answers[q][d.key]=best; seen[d.key]=true; changed=true;
+        if(isNew){ beep(); const r=roster().find(x=>x.key===d.key); $("flash").textContent="\u2714 "+((r&&r.name)||d.key)+" scanned"; }
       }
     });
     if(changed){ renderAll(); say("Live scanning... "+liveCount()+". Keep walking, then press Stop."); }
@@ -10428,6 +10466,11 @@ $("live").onclick=()=>{
     $("video").classList.remove("hide"); view.classList.add("hide"); say("Stopped. "+liveCount()+".");
   }
 };
+$("fsBtn").onclick=()=>{ const st=document.querySelector(".stage"); if(document.fullscreenElement){document.exitFullscreen();} else if(st.requestFullscreen){ st.requestFullscreen().then(()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock("landscape").catch(()=>{});}catch(e){}}).catch(()=>say("Full screen is not available on this browser.")); } };
+document.addEventListener("fullscreenchange",()=>{ $("fsBtn").innerHTML=document.fullscreenElement?"&#x2715; Exit full screen":"&#x26F6; Full screen"; $("fsLive").classList.toggle("hide",!document.fullscreenElement||$("live").disabled); });
+$("fsLive").onclick=()=>$("live").click();
+const _lt=()=>{ $("fsLive").textContent=$("live").textContent; };
+new MutationObserver(()=>{_lt(); $("fsLive").classList.toggle("hide",!document.fullscreenElement||$("live").disabled);}).observe($("live"),{childList:true,attributes:true});
 /* ---------- photo ---------- */
 $("photo").onchange=async e=>{
   const f=e.target.files[0]; if(!f) return;
